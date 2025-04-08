@@ -2,7 +2,7 @@ function checkThirdPassword() {
     const password = document.getElementById("thirdPassword").value;
     const message = document.getElementById("thirdMessage");
   
-    if (password === "finale") {
+    if (password === "Nordlichter") {
       message.textContent = "🎉 Glückwunsch! Du hast alles geschafft!";
       message.style.color = "green";
     } else {
