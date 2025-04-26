@@ -1,44 +1,31 @@
 body {
-    font-family: sans-serif;
-    text-align: center;
-    padding: 50px;
-    background: #f4f4f4;
-  }
-  
-  #login, #second-login {
-    background: white;
-    padding: 30px;
-    border-radius: 10px;
-    max-width: 400px;
-    margin: 30px auto;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  }
-  
-  input {
-    padding: 10px;
-    width: 80%;
-    margin-bottom: 10px;
-  }
-  
-  button {
-    padding: 10px 20px;
-    cursor: pointer;
-  }
-  
-  audio {
-    margin: 20px 0;
-  }
-  
-  #login input[type="password"] {
-    width: 200px;
-  }
-  
-  #second-login input[type="password"] {
-    width: 180px;
-  }
-  
-  #third-login input[type="password"] {
-    width: 150px;
-  }
-  
-  
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+}
+
+h2 {
+  text-align: center;
+}
+
+#password-container {
+  text-align: center;
+  margin-top: 20px;
+}
+
+input[type="password"] {
+  padding: 10px;
+  font-size: 16px;
+  margin-right: 10px;
+}
+
+button {
+  padding: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+div {
+  margin: 20px;
+}
