@@ -2,15 +2,44 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interaktive Webseite</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="login">
-    <h2>Hier kommt das Bild von dir</h2>
-    <input type="password" id="password" placeholder="Passwort">
-    <button onclick="checkPassword()">Login</button>
-    <p id="message"></p>
+  <!-- Seite 1 -->
+  <div id="page1">
+    <h2>Willkommen zu Seite 1</h2>
+    <p>Hier ist der Inhalt der ersten Seite.</p>
+    <div id="password-container">
+      <input type="text" id="password1" placeholder="Passwort eingeben">
+      <button onclick="checkPassword1()">Login</button>
+    </div>
+  </div>
+
+  <!-- Seite 2 mit Audio und Passwortfeld -->
+  <div id="page2" style="display: none;">
+    <h2>Willkommen zu Seite 2</h2>
+    <p>Hier kannst du eine Audio-Datei abspielen:</p>
+    <audio controls>
+      <source src="audio-datei.mp3" type="audio/mp3">
+      Dein Browser unterstützt dieses Audio-Format nicht.
+    </audio>
+
+    <div id="password-container">
+      <input type="text" id="password2" placeholder="Passwort eingeben">
+      <button onclick="checkPassword2()">Login</button>
+    </div>
+  </div>
+
+  <!-- Seite 3 -->
+  <div id="page3" style="display: none;">
+    <h2>Willkommen zu Seite 3</h2>
+    <p>Hier ist der Inhalt der dritten Seite.</p>
+    <div id="password-container">
+      <input type="text" id="password3" placeholder="Passwort eingeben">
+      <button onclick="checkPassword3()">Login</button>
+    </div>
   </div>
 
   <script src="script.js"></script>
