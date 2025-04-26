@@ -31,3 +31,20 @@ function checkPassword3() {
     alert("Falsches Passwort!");
   }
 }
+  // Event Listener für Enter-Taste bei allen Passwortfeldern
+document.getElementById("password1").addEventListener("keydown", function(event) {
+  if (event.key === "Enter") {
+    checkPassword1();
+  }
+})
+document.getElementById("password2").addEventListener("keydown", function(event) {
+  if (event.key === "Enter") {
+    checkPassword2();
+  }
+})
+document.getElementById("password3").addEventListener("keydown", function(event) {
+  if (event.key === "Enter") {
+    checkPassword3();
+  }
+})
+
