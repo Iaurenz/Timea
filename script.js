@@ -1,3 +1,8 @@
+function start(){
+  document.getElementById('start').style.display = 'none';
+  document.getElementById('page1').style.display = 'block';
+}
+
 // Funktion zum Überprüfen des Passworts auf Seite 1
 function checkPassword1() {
   const password = document.getElementById('password1').value;
