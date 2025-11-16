@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>GPS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: url('hintergrund.jpg.webp') no-repeat center center fixed;
+      background-size: cover;
+      text-align: center;
+      padding: 50px;
+      color: white;
+    }
+    .container {
+      background-color: rgba(165, 42, 42, 0.85);
+      padding: 30px;
+      border-radius: 10px;
+      display: inline-block;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      max-width: 95%;
+    }
+    .password-container {
+      position: relative;
+      display: inline-block;
+    }
+    input[type="password"], input[type="text"] {
+      padding: 10px 40px 10px 10px;
+      width: 220px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #555;
+      background: none;
+      border: none;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px 20px;
+      margin-top: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #error {
+      color: yellow;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>📍 GPS-Rätsel</h2>
+    <p>Das gesuchte Phänomen versteckt sich in dieser Nachricht.<br>
+    Du musst sie entschlüsseln:</p>
+    <p><b>68 Grad nördlicher Breite, 30 Bogenminuten und 32,2 Bogensekunden,<br>
+    27 Grad östlicher Länge, 28 Bogenminuten und 53,8 Bogensekunden.</b></p>
+
+    <p>Gib die Lösung ein:</p>
+
+    <div class="password-container">
+      <input type="password" id="gpsPw" placeholder="Lösung eingeben...">
+      <button class="toggle-password" id="togglePw">👁️</button>
+    </div>
+    <br>
+    <button id="gpsBtn">Weiter</button>
+    <p id="error"></p>
+  </div>
+
+  <script>
+    (function(){
+      const arr = ["getElementById","value","Tm9yZGxpY2h0ZXI=","atob","textContent"];
+      const get = function(i){ return arr[i]; };
+      const geheim = window[get(3)](arr[2]); // "Nordlichter"
+
+      // Passwort anzeigen/verbergen
+      const pwField = document[get(0)]("gpsPw");
+      const toggle = document[get(0)]("togglePw");
+      toggle.addEventListener("click", () => {
+        if (pwField.type === "password") {
+          pwField.type = "text";
+          toggle.textContent = "🙈";
+        } else {
+          pwField.type = "password";
+          toggle.textContent = "👁️";
+        }
+      });
+
+      // Passwort prüfen
+      document[get(0)]("gpsBtn").addEventListener("click", function(){
+        const eingabe = pwField[get(1)].trim();
+        if (eingabe.toLowerCase() === geheim.toLowerCase()) {
+          window.location.href = "link.html";
+        } else {
+          document[get(0)]("error")[get(4)] = "Das war nicht die richtige Lösung.";
+        }
+      });
+    })();
+  </script>
+
+</body>
+</html>

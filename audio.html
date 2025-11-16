@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Zeichen entschlüsseln</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: url('hintergrund.jpg.webp') no-repeat center center fixed;
+      background-size: cover;
+      text-align: center;
+      padding: 50px;
+      color: white;
+    }
+    .container {
+      background-color: rgba(0,0,0,0.6);
+      padding: 30px;
+      border-radius: 15px;
+      display: inline-block;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      max-width: 90%;
+    }
+    audio { width: 100%; margin: 20px 0; }
+    .input-container { position: relative; display: inline-block; }
+    input[type="password"], input[type="text"] {
+      padding: 10px 35px 10px 10px;
+      width: 220px;
+      border-radius: 5px;
+      border: none;
+      font-size: 16px;
+    }
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      font-size: 18px;
+      color: #ccc;
+      user-select: none;
+    }
+    button {
+      padding: 10px 20px;
+      margin-top: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover { background-color: #45a049; }
+    #error { color: yellow; margin-top: 10px; }
+    h2 { margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Die Sprache spricht in Zeichen – doch wer versteht, kommt weiter</h2>
+
+    <audio controls>
+      <source src="morse.mp3" type="audio/mpeg">
+      <!-- Fallback-Text wird nur angezeigt, wenn Audio gar nicht unterstützt wird -->
+    </audio>
+
+    <div class="input-container" style="margin-top:10px;">
+      <input type="password" id="pw2" placeholder="Zeichen entschlüsseln..." aria-label="Passwort">
+      <span id="togglePw" class="toggle-password" role="button" aria-label="Passwort zeigen">👁️</span>
+    </div>
+    <br>
+    <button id="btn2">Weiter</button>
+    <p id="error"></p>
+  </div>
+
+  <script>
+    (function () {
+      // korrekte verschlüsselte Form (enthält kein Klartext)
+      // Vorgehen: reverse->btoa; hier ist der fertige String für "Echo"
+      const encoded = "b2hjRQ=="; // ergibt intern: atob(...) -> "ohcE" -> reversed -> "Echo"
+
+      function getSecret(enc) {
+        try {
+          const decoded = atob(enc);          // -> "ohcE"
+          return decoded.split('').reverse().join(''); // -> "Echo"
+        } catch (e) {
+          return ''; // falls etwas schiefgeht
+        }
+      }
+
+      const secret = getSecret(encoded);
+
+      const inputField = document.getElementById('pw2');
+      const btn = document.getElementById('btn2');
+      const err = document.getElementById('error');
+      const toggle = document.getElementById('togglePw');
+
+      // Klick / Prüfung
+      btn.addEventListener('click', function () {
+        err.textContent = '';
+        const val = inputField.value.trim();
+        if (val === secret) {
+          window.location.href = 'puzzle.html';
+        } else {
+          err.textContent = 'Verkannt das Zeichen oder verfehlt der Sinn – nur wer versteht, gelangt dorthin.';
+        }
+      });
+
+      // Enter-Taste auslösen
+      inputField.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') btn.click();
+      });
+
+      // Auge: sichtbar / unsichtbar
+      toggle.addEventListener('click', function () {
+        if (inputField.type === 'password') {
+          inputField.type = 'text';
+          toggle.textContent = '🙈';
+        } else {
+          inputField.type = 'password';
+          toggle.textContent = '👁️';
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

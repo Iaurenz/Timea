@@ -3,54 +3,128 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interaktive Webseite</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Timeas Mystery Hunt – Zugang</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: url('hintergrund.jpg.webp') no-repeat center center fixed;
+      background-size: cover;
+      text-align: center;
+      color: white;
+      padding: 60px;
+    }
+
+    .container {
+      background-color: rgba(0, 0, 0, 0.6);
+      display: inline-block;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    .input-container {
+      position: relative;
+      display: inline-block;
+    }
+
+    input[type="password"],
+    input[type="text"] {
+      padding: 10px 35px 10px 10px;
+      width: 250px;
+      border-radius: 5px;
+      border: none;
+      margin-top: 20px;
+      font-size: 16px;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      font-size: 18px;
+      color: #555;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 10px 25px;
+      background-color: #000000;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #000000;
+    }
+
+    #error {
+      color: #eb2f2f;
+      margin-top: 10px;
+    }
+
+    .geheim {
+      font-style: italic;
+      color: #ded5c7;
+      margin-bottom: 15px;
+    }
+  </style>
 </head>
 <body>
-  <div id="start">
-    <h2>Willkommen</h2>
-    <div>
-      <button onclick="start()">Start</button>
+
+  <div class="container">
+    <p class="geheim">🔒 Geheimer Bereich – nur wer das erste Rätsel lösen kann, darf eintreten.</p>
+    <h1>Timeas Mystery Hunt</h1>
+    <p>Gib das Passwort ein, um zu beginnen 🔑:</p>
+
+    <div class="input-container">
+      <input type="password" id="pw1" placeholder="Passwort eingeben">
+      <span id="togglePw" class="toggle-password">👀</span>
     </div>
-  </div>
-  
-  
-  
-  <!-- Seite 1 -->
-  <div id="page1" style="display: none;">
-    <h2>Willkommen zu Seite 1</h2>
-    <p>Hier ist der Inhalt der ersten Seite.</p>
-    <div id="password-container">
-      <input type="text" id="password1" placeholder="Passwort eingeben">
-      <button onclick="checkPassword1()">Login</button>
-    </div>
+    <br>
+    <button id="btn1">Login</button>
+    <p id="error"></p>
   </div>
 
-  <!-- Seite 2 mit Audio und Passwortfeld -->
-  <div id="page2" style="display: none;">
-    <h2>Willkommen zu Seite 2</h2>
-    <p>Hier kannst du eine Audio-Datei abspielen:</p>
-    <audio controls>
-      <source src="audio-datei.mp3" type="audio/mp3">
-      Dein Browser unterstützt dieses Audio-Format nicht.
-    </audio>
+  <script>
+    (function(){
+      // Passwort "Maria Stuart" Base64-verschlüsselt
+      const encoded = "TWFyaWEgU3R1YXJ0";
+      const secret = atob(encoded);
 
-    <div id="password-container">
-      <input type="text" id="password2" placeholder="Passwort eingeben">
-      <button onclick="checkPassword2()">Login</button>
-    </div>
-  </div>
+      // Passwort-Check
+      document.getElementById("btn1").addEventListener("click", function(){
+        const input = document.getElementById("pw1").value.trim();
+        if(input === secret){
+          window.location.href = "audio.html";
+        } else {
+          document.getElementById("error").textContent = 
+            "Falsches Passwort. Die Zeit selbst gibt dir keinen Hinweis – nur Wissen.";
+        }
+      });
 
-  <!-- Seite 3 -->
-  <div id="page3" style="display: none;">
-    <h2>Willkommen zu Seite 3</h2>
-    <p>Hier ist der Inhalt der dritten Seite.</p>
-    <div id="password-container">
-      <input type="text" id="password3" placeholder="Passwort eingeben">
-      <button onclick="checkPassword3()">Login</button>
-    </div>
-  </div>
+      // Passwort sichtbar/unsichtbar machen
+      const pwField = document.getElementById("pw1");
+      const toggle = document.getElementById("togglePw");
+      toggle.addEventListener("click", () => {
+        const type = pwField.getAttribute("type") === "password" ? "text" : "password";
+        pwField.setAttribute("type", type);
+        toggle.textContent = type === "password" ? "👀" : "🙈";
+      });
+    })();
+  </script>
 
-  <script src="script.js"></script>
 </body>
 </html>
+
+
+
+
+

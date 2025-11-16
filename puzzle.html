@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Puzzle lösen</title>
+<style>
+  :root { --cols:7; --rows:10; } /* 7 x 10 = 70 Teile */
+  html,body{ height:100%; margin:0; }
+  body{
+    font-family: Arial, Helvetica, sans-serif;
+    background: url('hintergrund.jpg.webp') no-repeat center center fixed;
+    background-size: cover;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    padding:18px;
+    box-sizing:border-box;
+  }
+  h2{
+    margin: 6px 0 12px 0;
+    text-shadow:0 1px 3px rgba(0,0,0,0.6);
+  }
+
+  /* Puzzle-Box: Breite begrenzt damit alles auf eine Seite passt */
+  #puzzleContainer{
+    position:relative;
+    width: min(760px, 88vw);
+    /* Höhe wird per JS gesetzt proportional zur Bildgröße */
+    background: rgba(0,0,0,0.35);
+    border-radius:10px;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.45);
+    overflow:hidden;
+  }
+
+  /* einzelne Kachel */
+  .tile{
+    position:absolute;
+    box-sizing:border-box;
+    background-repeat:no-repeat;
+    cursor:pointer;
+    transition: left .18s ease, top .18s ease;
+    -webkit-user-select:none;
+    -ms-user-select:none;
+    user-select:none;
+    touch-action: manipulation;
+  }
+  .tile.selected{
+    outline: 3px solid #ffd77a;
+    z-index: 6;
+  }
+  .tile.fixed{
+    cursor: default;
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.02);
+  }
+
+  /* Frage-Box (erscheint nach lösen) */
+  #questionBox{
+    display:none;
+    margin-top:16px;
+    background: rgba(0,0,0,0.6);
+    padding:14px;
+    border-radius:10px;
+    width: min(760px, 92vw);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.45);
+    text-align:center;
+  }
+  #questionBox h3{ margin:0 0 8px 0; color:#ffefc0; font-size:1rem; }
+  .answer-row{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:center; }
+  input[type="password"]{
+    padding:10px;
+    border-radius:6px;
+    border:none;
+    font-size:16px;
+    width: 240px;
+    max-width:60vw;
+  }
+  .eye-btn{
+    background:none;
+    border:none;
+    color:#fff;
+    font-size:18px;
+    cursor:pointer;
+    margin-left:-40px;
+  }
+  button.action{
+    padding:9px 14px;
+    border-radius:8px;
+    border:none;
+    background:#4CAF50;
+    color:white;
+    cursor:pointer;
+  }
+  button.action:hover{ background:#45a049; }
+  #error{ color:#ffd54d; margin-top:8px; min-height:20px; }
+  @media (max-width:420px){
+    input[type="password"]{ width:160px; }
+    #puzzleContainer{ width: 94vw; }
+  }
+</style>
+</head>
+<body>
+  <h2>🧩 Löse das Puzzle für den weiteren Hinweis</h2>
+
+  <div id="puzzleContainer" aria-label="Puzzle"></div>
+
+  <div id="questionBox" role="region" aria-live="polite">
+    <h3>Wie lautet der Titel seiner berühmtesten Liebesgeschichte?</h3>
+    <div class="answer-row">
+      <div style="position:relative; display:inline-block;">
+        <input type="password" id="pw3" placeholder="Antwort eingeben" aria-label="Antwort">
+        <button class="eye-btn" id="togglePw" aria-label="Passwort zeigen">👁️</button>
+      </div>
+      <div>
+        <button class="action" id="btn3">Weiter</button>
+      </div>
+    </div>
+    <div id="error"></div>
+  </div>
+
+<script>
+/* ---------- Einstellungen ---------- */
+const COLS = 7;
+const ROWS = 10;
+const IMAGE = 'puzzlebild.jpg';        // <- Dateiname deines Puzzlebilds
+const CONTAINER = document.getElementById('puzzleContainer');
+const QUESTION_BOX = document.getElementById('questionBox');
+const ERROR = document.getElementById('error');
+/* ---------------------------------- */
+
+let tiles = []; // { el, origR, origC, correctIndex, currentIndex, movable }
+let tileW, tileH, contW, contH;
+let selected = null;
+
+// Bild laden
+const img = new Image();
+img.src = IMAGE;
+img.onload = () => {
+  // Berechne Skalierung so, dass Puzzle in View passt (max Höhe/Breite)
+  const maxW = Math.min(760, Math.round(window.innerWidth * 0.88));
+  const maxH = Math.round(window.innerHeight * 0.62);
+  const scale = Math.min(1, maxW / img.naturalWidth, maxH / img.naturalHeight);
+  contW = Math.max(200, Math.round(img.naturalWidth * scale));
+  contH = Math.max(200, Math.round(img.naturalHeight * scale));
+  // Container größe setzen
+  CONTAINER.style.width = contW + 'px';
+  CONTAINER.style.height = contH + 'px';
+
+  tileW = contW / COLS;
+  tileH = contH / ROWS;
+
+  buildTiles();
+  shuffleInner();
+  placeAll();
+};
+
+// Baue alle Kacheln (nur DOM + Hintergrundpos)
+function buildTiles(){
+  tiles = [];
+  CONTAINER.innerHTML = '';
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      const correctIndex = r * COLS + c;
+      const el = document.createElement('div');
+      el.className = 'tile';
+      // Größe
+      el.style.width = tileW + 'px';
+      el.style.height = tileH + 'px';
+      // Bildausschnitt: immer nach original-Position setzen
+      el.style.backgroundImage = `url("${IMAGE}")`;
+      el.style.backgroundSize = `${contW}px ${contH}px`;
+      el.style.backgroundPosition = `-${c * tileW}px -${r * tileH}px`;
+      el.dataset.r = r;
+      el.dataset.c = c;
+
+      // Randstücke sind fixed
+      const isBorder = (r === 0 || r === ROWS-1 || c === 0 || c === COLS-1);
+      const tile = {
+        el,
+        origR: r,
+        origC: c,
+        correctIndex,
+        currentIndex: null, // wird gesetzt
+        movable: !isBorder
+      };
+      if(isBorder){
+        el.classList.add('fixed');
+      } else {
+        // interaktive Stücke hören auf Klick / Touch
+        el.addEventListener('click', () => tileClick(tile));
+        el.addEventListener('touchstart', (ev) => { ev.preventDefault(); tileClick(tile); });
+      }
+      CONTAINER.appendChild(el);
+      tiles.push(tile);
+    }
+  }
+}
+
+// Shuffle nur die inneren Positionen
+function shuffleInner(){
+  // sammle alle inneren positions (indices)
+  const innerPositions = [];
+  for(let r=1;r<ROWS-1;r++){
+    for(let c=1;c<COLS-1;c++){
+      innerPositions.push(r*COLS + c);
+    }
+  }
+  // mische (Fisher-Yates)
+  for(let i = innerPositions.length -1; i>0; i--){
+    const j = Math.floor(Math.random() * (i+1));
+    [innerPositions[i], innerPositions[j]] = [innerPositions[j], innerPositions[i]];
+  }
+  // weise pos an tiles: randstücke bekommen ihre korrekte Position, innere Stücke die gemischten
+  let innerIdx = 0;
+  tiles.forEach(t => {
+    if(!t.movable){
+      t.currentIndex = t.correctIndex; // Rand korrekt
+    } else {
+      t.currentIndex = innerPositions[innerIdx++];
+    }
+  });
+}
+
+// positioniere alle Kacheln gemäss currentIndex
+function placeAll(){
+  tiles.forEach(t => {
+    const idx = t.currentIndex;
+    const pr = Math.floor(idx / COLS);
+    const pc = idx % COLS;
+    t.el.style.left = (pc * tileW) + 'px';
+    t.el.style.top = (pr * tileH) + 'px';
+    // ensure background size/position (in case of window resize)
+    t.el.style.backgroundSize = `${contW}px ${contH}px`;
+    t.el.style.backgroundPosition = `-${t.origC * tileW}px -${t.origR * tileH}px`;
+  });
+}
+
+// Klickverhalten: auswählen, dann zweiter Klick -> tauschen
+function tileClick(tile){
+  if(!tile.movable) return;
+  if(!selected){
+    selected = tile;
+    tile.el.classList.add('selected');
+    return;
+  }
+  if(selected === tile){
+    selected.el.classList.remove('selected');
+    selected = null;
+    return;
+  }
+  // tausche currentIndex
+  const a = selected;
+  const b = tile;
+  const tmp = a.currentIndex;
+  a.currentIndex = b.currentIndex;
+  b.currentIndex = tmp;
+  // animiere platzierung
+  placeAll();
+  a.el.classList.remove('selected');
+  selected = null;
+  // prüfen
+  checkSolved();
+}
+
+// prüfe ob alle an korrekter Position
+function checkSolved(){
+  const allOk = tiles.every(t => t.currentIndex === t.correctIndex);
+  if(allOk){
+    // Puzzle gelöst -> Frage anzeigen
+    setTimeout(() => {
+      QUESTION_BOX.style.display = 'block';
+      QUESTION_BOX.scrollIntoView({behavior:'smooth', block:'center'});
+    }, 200);
+    // Deaktiviere weitere Interaktion
+    tiles.forEach(t => { t.el.classList.remove('selected'); t.movable = false; });
+  }
+}
+
+/* ---------- Passwort-Logik (verschlüsselt) ---------- */
+(function(){
+  const encoded = "Um9tZW8gdW5kIEp1bGlh"; // Base64 (kein Klartext im Skript)
+  const secret = (function(s){ try { return atob(s); } catch(e){ return ''; } })(encoded);
+
+  const input = document.getElementById('pw3');
+  const btn = document.getElementById('btn3');
+  const toggle = document.getElementById('togglePw');
+
+  btn.addEventListener('click', () => {
+    ERROR.textContent = '';
+    const val = input.value.trim();
+    if(val === secret){
+      window.location.href = 'gps.html';
+    } else {
+      ERROR.textContent = 'Verkannt das Zeichen oder verfehlt der Sinn – nur wer versteht, gelangt dorthin.';
+    }
+  });
+
+  input.addEventListener('keydown', (e) => { if(e.key === 'Enter') btn.click(); });
+
+  toggle.addEventListener('click', () => {
+    if(input.type === 'password'){ input.type = 'text'; toggle.textContent = '🙈'; }
+    else { input.type = 'password'; toggle.textContent = '👁️'; }
+  });
+})();
+</script>
+</body>
+</html>
